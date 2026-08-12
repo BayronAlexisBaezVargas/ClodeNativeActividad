@@ -12,9 +12,10 @@ public class HolaMundoV1 {
     public String holaMundo() {
         return "Hola Mundo";
     }
+    //aqui habia un bug porque decia la version del codigo
     @PostMapping
     public String Despedida() {
-        return "Adios Mundo v1.1.0";
+        return "Adios Mundo";
     }
 
 }
