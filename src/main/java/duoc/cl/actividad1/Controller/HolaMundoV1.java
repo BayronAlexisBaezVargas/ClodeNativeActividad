@@ -1,5 +1,6 @@
 package duoc.cl.actividad1.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,4 +12,9 @@ public class HolaMundoV1 {
     public String holaMundo() {
         return "Hola Mundo";
     }
+    @PostMapping
+    public String Despedida() {
+        return "Adios Mundo v1.1.0";
+    }
+
 }
