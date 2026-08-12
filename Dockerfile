@@ -1,23 +1,32 @@
-# Etapa de construcción (Build)
-FROM maven:3.9.6-eclipse-temurin-17-alpine AS build
+# --- Etapa 1: Build (Construcción) ---
+# Usamos una imagen de Maven con JDK 21 para compilar el código
+FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 
-# Copiar configuración de dependencias y código fuente
+# 1. Copiamos el POM y descargamos las dependencias
+# Esto se hace primero para aprovechar la caché de capas de Docker
 COPY pom.xml .
-COPY src ./src
+RUN mvn dependency:go-offline -B
 
-# Compilar y empaquetar la aplicación omitiendo tests para acelerar el build
+# 2. Copiamos el código fuente y compilamos el archivo JAR
+COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Etapa de ejecución (Runtime)
-FROM eclipse-temurin:17-jre-alpine
+# --- Etapa 2: Runtime (Ejecución) ---
+# Usamos solo el JRE 21 (más ligero) para correr la aplicación
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-# Copiar el JAR generado desde la etapa de build
+
+# 3. Seguridad: Creamos un usuario de sistema para no ejecutar como root
+RUN addgroup -S spring && adduser -S spring -G spring
+# 4. Copiamos el artefacto construido desde la etapa anterior
 COPY --from=build /app/target/*.jar app.jar
 
-# Exponer el puerto por defecto de Spring Boot
+USER spring:spring
+
+# 5. Exponemos el puerto estándar de Spring Boot
 EXPOSE 8080
 
-# Comando de ejecución
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# 6. Comando de inicio con optimización de memoria para contenedores
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
