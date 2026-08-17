@@ -1,3 +1,6 @@
 spring:
   application:
     name: Actividad1
+
+jwt:
+  secret: EstaEsUnaClaveSuperSeguraDe32Caracteres123!
